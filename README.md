@@ -3,10 +3,11 @@ WIP. Working on a program to use ray marching to render 3D fractals composed of 
 
 **Currently Implemented:**
 - Unlit rendering of fractals composed of translated primitives.
+- Glow implemented by visualising how close non-hitting rays come to the object.
 
 **To do:**
 - Lit shading.
-- Glow/ambient occlusion.
+- Ambient occlusion.
 
 # Images
 
