@@ -10,4 +10,4 @@ WIP. Working on a program to use ray marching to render 3D fractals. Implemented
 
 # Images
 
-<img src="https://raw.github.com/akoreman/WIP-Compute-Shader-Ray-Marching/master/images/Capture.jpg" width="400">  
+<img src="https://raw.github.com/akoreman/WIP-Compute-Shader-Ray-Marching/main/images/Spheres.png" width="400">  
