@@ -7,3 +7,7 @@ WIP. Working on a program to use ray marching to render 3D fractals. Implemented
 **To do:**
 - Lit shading.
 - Glow/ambient occlusion.
+
+# Images
+
+<img src="https://raw.github.com/akoreman/WIP-Compute-Shader-Ray-Marching/master/images/Capture.jpg" width="400">  
