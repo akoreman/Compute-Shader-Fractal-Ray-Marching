@@ -7,7 +7,8 @@ Work In Progress. Working on a program to use ray marching to render in real-tim
 
 **To do:**
 - Lit shading.
-- Ambient occlusion.
+- Visual effects, e.g. ambient occlusion.
+- Directional shadows.
 
 # Images
 
