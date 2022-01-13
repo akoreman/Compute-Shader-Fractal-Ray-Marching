@@ -6,7 +6,7 @@ Work In Progress. Working on a program to use ray marching to render in real-tim
 - Glow implemented by visualising how close non-hitting rays get to the object.
 
 **To do:**
-- Lit shading.
+- Lit shading by normal vector approximation.
 - Visual effects, e.g. ambient occlusion.
 - Directional shadows.
 
