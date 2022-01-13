@@ -1,4 +1,4 @@
-// Each #kernel tells which function to compile; you can have many kernels
+
 #pragma kernel CSMain
 
 // These are set from RayMarcher.cs /////////
@@ -14,9 +14,12 @@ float4 _CameraRotation;
 
 static const float epsilon = 0.01;
 static const float maxMarchDistance = 25;
-static const int maxNumMarchSteps = 25;
+static const int maxNumMarchSteps = 50;
 
 float power = 1.5;
+
+#include "Folds.hlsl"
+#include "DistanceEstimators.hlsl"
 
 struct Ray
 {
@@ -48,147 +51,70 @@ Ray CreateCameraRay(float2 xy)
 	return CreateRay(Origin,Direction);
 }
 
-/*
-float2 SceneInfo(float3 position) 
+
+
+float infiniteShapes(float3 Position)
 {
-    float3 z = position;
-	float dr = 1.0;
-	float r = 0.0;
-    int iterations = 0;
+	Position = ApplyAbsX(Position);
+	Position = ApplyModX(Position,2);
+	Position = ApplyAbsY(Position);
+	Position = ApplyModY(Position, 2);
+	Position = ApplyAbsZ(Position);
+	Position = ApplyModZ(Position, 2);
 
-	for (int i = 0; i < 15 ; i++) {
-        iterations = i;
-		r = length(z);
-
-		if (r>2) 
-		{
-            break;
-        }
-        
-		// convert to polar coordinates
-		float theta = acos(z.z/r);
-		float phi = atan2(z.y,z.x);
-		dr =  pow( r, power-1.0)*power*dr + 1.0;
-
-		// scale and rotate the point
-		float zr = pow( r,power);
-		theta = theta*power;
-		phi = phi*power;
-		
-		// convert back to cartesian coordinates
-		z = zr*float3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
-		z+=position;
-	}
-
-    float dst = 0.5*log(r)*r/dr;
-	return float2(iterations,dst*1);
+	//return ApplyDETetra(Position, 0.5, float3(1, 1, 1));
+	return ApplyDESphere(Position, 0.5, float3(1, 1, 1));
+	//return ApplyDEBox(Position, float3(.5, .5, .5), float3(1, 1, 1));
 }
-*/
 
-float DETetraHedron(float3 Position)
+
+float sierpinskiTetrahedron(float3 Position)
 {
-	int Iterations = 12;
-	float Scale = 2;
-	float3 a1 = float3(1, 1, 1);
-	float3 a2 = float3(-1, -1, 1);
-	float3 a3 = float3(1, -1, -1);
-	float3 a4 = float3(-1, 1, -1);
-	float3 c;
+	float r;
 	int n = 0;
-	float dist, d;
+	int Iterations = 10;
+	float Scale = 2; 
+	float3 Offset = float3(1, 1, 1);
 	while (n < Iterations) {
-		c = a1;
-		dist = length(Position - a1);
-		d = length(Position - a2);
-		if (d < dist) { c = a2; dist = d; }
-		d = length(Position - a3);
-		if (d < dist) { c = a3; dist = d; }
-		d = length(Position - a4);
-		if (d < dist) { c = a4; dist = d; }
-		Position = Scale * Position - c * (Scale - 1.0);
+		Position = ApplySierpinskiFold(Position);
+		Position = ApplyScaleTranslate(Position, Scale, Offset);
 		n++;
 	}
 
+	//float Distance = ApplyDESphere(Position, 1.0, float3(0, 0, 0));
+	float Distance = ApplyDETetra(Position, 1.0, float3(0, 0, 0));
+	//float Distance = ApplyDEBox(Position, float3(1,1,1), float3(1,1,1));
 
-	return length(Position) * pow(Scale, float(-n));
+	return Distance * pow(Scale, -float(n));
 }
 
-float DESphere(float3 Position)
+float mandelBox(float3 Position)
 {
-	float3 Center = float3(.5,.5,.5);
-	float Radius = 0.3;
+	int n = 0;
+	int Iterations = 16;
 
-	float modulo = 2;
-
-	//float s = sin (3.6);
-	//float c = cos (3.6);
-
-	//Position = abs(Position);
-
-	/*
-	Position.x = Position.x;// % modulo;
-	Position.y = Position.y;// % modulo;
-	Position.z = Position.z;// % modulo;
-	*/
-
-	//Position = abs (Position);
-	float a = 1;
-
-	//Position.x = abs( (Position.x - a/2) % a - a/2 );
-	Position.x = fmod(Position.x, a);// -.5);
-	Position.z = fmod(Position.z, a);// -.5);
-	//Position.z = (fmod(Position.z , a));
-	//Position.x = abs((Position.x) % a );
-
-	//Position = fmod(Position, modulo);
-	//Position = Position % modulo;
-
-	//Position.y = (c*Position.y + s*Position.z);
-	//Position.z = (c*Position.z - s*Position.y);
-
-	/////////// ButterWeed Hills ////////////////
-	int counter = 0;
-	
-
-	/*
-	while (counter < 2)
-	{
-		counter++;
-		Position = abs(Position);
-
-		//Position *= 1.5;
-		//Position.x -= 1.0;
-		//Position.y -= 0.5;
-		//Position.z -= 0.2;
-
-		s = sin(3.61);
-		c = cos(3.61);
-
-		//Position.y = (c*Position.y + s*Position.z);
-		//Position.z = (c*Position.z - s*Position.y);
-
-		s = sin(2.03);
-		c = cos(2.03);
-
-		//Position.z = (c*Position.z + s*Position.x);
-		//Position.x = (c*Position.x - s*Position.z);
+	while (n < Iterations) {		
+		n++;
+		Position = ApplyBoxFold(Position, 1);
+		Position = ApplySphereFold(Position, .5, 1);
 	}
-	*/
-	//Position = abs(Position);
-	
-	float3 distanceVector = Position - Center;
 
-	return max(0,( length(distanceVector) - Radius));
+	return ApplyDESphere(Position, 1, float3(1, 1, 1));
+	//return ApplyDEBox(Position, float3(1, 1, 1), float3(1, 1, 1));
 }
 
-float DEBox( float3 Position, float3 b )
+float snowStadium(float3 Position)
 {
-	float modulo = 10.0;
-	Position = Position % modulo;
+	int n = 0;
+	int Iterations = 10;
 
-	float3 q = abs(Position) - b;
-	return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+	while (n < Iterations) {
+		n++;
+
+
+	}
 }
+
 
 
 float EstimateNormalSphere(float3 Position, float3 Center, float3 lightDirection)
@@ -212,9 +138,6 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	float2 uv = id.xy / float2(width,height) * 2 - 1;
 
     Ray cameraRay = CreateCameraRay(uv);
-
-	//float escapeIterations = 1;
-
 	bool hit = false;
 
 	Target[id.xy] = float4(0,1,1,0);
@@ -222,12 +145,10 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	while (marchDistance < maxMarchDistance && numMarchSteps < maxNumMarchSteps)
 	{
 		numMarchSteps++;
-		//ADD CODE TO GET MIN DISTANCE
-		//float minDistance = DESphere(cameraRay.Origin);
-		float minDistance = DETetraHedron(cameraRay.Origin);
-		//float minDistance = DEBox(cameraRay.Origin, float3(2,2,2));
-		//float2 sceneInfo = SceneInfo(cameraRay.Origin);
-		//float minDistance = sceneInfo.y;
+
+		float minDistance = sierpinskiTetrahedron(cameraRay.Origin);
+		//float minDistance = infiniteShapes(cameraRay.Origin);
+		//float minDistance = mandelBox(cameraRay.Origin);
 
 		if (minDistance < cameraRay.closestPoint) {cameraRay.closestPoint = minDistance;}
 
@@ -239,16 +160,13 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 			hit = true;
 			light =(float) numMarchSteps/ (float) maxNumMarchSteps;
 			//light = marchDistance/ maxMarchDistance;
-			//float light = 1;
-			//light = EstimateNormalSphere(cameraRay.Origin,float3(0,0,0),float3(-1,0,0));
+			//light = 1;
+
 			Target[id.xy] = light* float4(1,0,0,0);
 
 			break;
 		}
-
-		
-
-		
+	
 		marchDistance += minDistance;
 		cameraRay.Origin += cameraRay.Direction * minDistance;
 	}
@@ -259,5 +177,4 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 		Target[id.xy] += Glow;
 	}
 
-	//ADD CODE TO WRITE OUTPUT PIXEL
 }
