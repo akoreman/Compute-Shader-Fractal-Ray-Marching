@@ -18,7 +18,7 @@ float ClipToRange(float v, float r)
 
 float3 ApplyScaleTranslate(float3 Position, float Scale, float3 Offset)
 {
-	return Position * Scale - Offset * (Scale - 1.0);
+	return Position * Scale + Offset;
 }
 
 float3 ApplySierpinskiFold(float3 Position)
@@ -26,6 +26,15 @@ float3 ApplySierpinskiFold(float3 Position)
 	if (Position.x + Position.y < 0) Position.xy = -Position.yx; 
 	if (Position.x + Position.z < 0) Position.xz = -Position.zx; 
 	if (Position.y + Position.z < 0) Position.zy = -Position.yz;	
+
+	return Position;
+}
+
+float3 ApplyMengerFold(float3 Position)
+{
+	if (Position.x < Position.y) Position.xy = Position.yx;
+	if (Position.x < Position.z) Position.xz = Position.zx;
+	if (Position.y < Position.z) Position.zy = Position.yz;
 
 	return Position;
 }
@@ -44,11 +53,6 @@ float3 ApplySphereFold(float3 Position, float minR, float maxR)
 {
 	float rSquared = dot(Position, Position);
 	return Position * max(maxR / max(minR, rSquared), 1.0);
-}
-
-float3 ApplyScaleOrigin(float3 Position)
-{
-
 }
 
 
@@ -85,6 +89,46 @@ float3 ApplyModY(float3 Position, float m)
 float3 ApplyModZ(float3 Position, float m)
 {
 	Position.z = Position.z % m;
+	return Position;
+}
+
+float3 ApplyRotX(float3 Position, float Angle)
+{
+	float s = sin(Angle);
+	float c = cos(Angle);
+
+	Position.y = c * Position.y + s * Position.z;
+	Position.z = c * Position.z - s * Position.y;
+
+	return Position;
+}
+
+float3 ApplyRotY(float3 Position, float Angle)
+{
+	float s = sin(Angle);
+	float c = cos(Angle);
+
+	Position.x = c * Position.z - s * Position.z;
+	Position.z = c * Position.z + s * Position.x;
+
+	return Position;
+}
+
+float3 ApplyRotZ(float3 Position, float Angle)
+{
+	float s = sin(Angle);
+	float c = cos(Angle);
+
+	Position.x = c * Position.x + s * Position.y;
+	Position.y = c * Position.y - s * Position.x;
+
+	return Position;
+}
+
+float3 ApplyNFold(float3 Position, float3 n, float d)
+{
+	Position -= 2 * min(0, dot(Position, n) - d) * n;
+
 	return Position;
 }
 

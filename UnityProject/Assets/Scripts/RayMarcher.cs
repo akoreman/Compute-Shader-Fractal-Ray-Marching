@@ -11,18 +11,18 @@ public class RayMarcher : MonoBehaviour
     [SerializeField]
     ComputeShader rayMarcher;
 
+    float movementSpeed;
+    float rotationSpeed;
 
-    
-    void Init()
+    void Awake()
     {
-        camera = Camera.current;
+        movementSpeed = 0.1f;
+        rotationSpeed = 60f;
     }
-    
 
     void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-
-        Init();
+        camera = Camera.current;
 
         if (target == null)
         {
@@ -37,43 +37,71 @@ public class RayMarcher : MonoBehaviour
         rayMarcher.SetVector("_CameraPosition", camera.transform.position);
         rayMarcher.SetVector("_CameraRotation", camera.transform.eulerAngles);
 
-        //target = source;
-
         rayMarcher.SetTexture(0, "Source", source);
         rayMarcher.SetTexture(0, "Target", target);
+
+        rayMarcher.EnableKeyword("CAST_SHADOWS");
 
         int threadGroupsX = (int) Mathf.Ceil(camera.pixelWidth / 8.0f);
         int threadGroupsY = (int) Mathf.Ceil(camera.pixelHeight / 8.0f);
 
-       
-
+      
         rayMarcher.Dispatch(0, threadGroupsX, threadGroupsY, 1);
-
-        
+  
         
         Graphics.Blit(target, destination);
     }
 
     void Update()
     {
-        Vector3 currentAngles = camera.transform.eulerAngles;
+        if (Input.GetKeyDown("x"))
+        {
+            movementSpeed /= Mathf.Sqrt(10f);
+            print(movementSpeed);
+        }
+
+        if (Input.GetKeyDown("c"))
+        {
+            movementSpeed *= Mathf.Sqrt(10f);
+            print(movementSpeed);
+        }
+
+        if (Input.GetKeyDown("v"))
+        {
+            rotationSpeed -= 5f;
+            rotationSpeed = Mathf.Max(rotationSpeed, 0f);
+            print(rotationSpeed);
+        }
+
+        if (Input.GetKeyDown("b"))
+        {
+            rotationSpeed += 5f;
+            print(rotationSpeed);
+        }
+
+        if (Input.GetKeyDown("r"))
+        {
+            camera.transform.localPosition = new Vector3(0f,0f,0f);
+            camera.transform.eulerAngles = new Vector3(0f, 0f, 0f);
+        }
+
+        Vector3 currentAngles = camera.transform.localEulerAngles;
         Vector3 currentPosition = camera.transform.localPosition;
 
-        currentAngles.y += Input.GetAxis("Horizontal") * 20.0f * Time.deltaTime;
-        currentAngles.x -= Input.GetAxis("Vertical") * 20.0f * Time.deltaTime;
+        currentAngles.y += Input.GetAxis("Horizontal") * rotationSpeed * Time.deltaTime;
+        currentAngles.x -= Input.GetAxis("Vertical") * rotationSpeed * Time.deltaTime;
 
-        camera.transform.eulerAngles = currentAngles;
+        camera.transform.localEulerAngles = currentAngles;
 
         if (Input.GetKey("space"))
         {
             Vector3 Direction = camera.transform.forward;
 
-            currentPosition += Direction * 0.1f * Time.deltaTime;
+            currentPosition += Direction * movementSpeed * Time.deltaTime;
         }
 
         camera.transform.localPosition = currentPosition;
     }
-
 
 }
 

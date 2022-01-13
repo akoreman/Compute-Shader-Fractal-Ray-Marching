@@ -1,5 +1,6 @@
 
 #pragma kernel CSMain
+#pragma multi_compile __ CAST_SHADOWS
 
 // These are set from RayMarcher.cs /////////
 Texture2D<float4> Source;
@@ -12,14 +13,19 @@ float4 _CameraPosition;
 float4 _CameraRotation;
 ////////////////////////////////////////
 
-static const float epsilon = 0.01;
-static const float maxMarchDistance = 25;
-static const int maxNumMarchSteps = 50;
-
-float power = 1.5;
-
 #include "Folds.hlsl"
 #include "DistanceEstimators.hlsl"
+#include "Fractals.hlsl"
+
+static const float epsilon = 0.0001;
+static const float maxMarchDistance = 250;
+static const int maxNumMarchSteps = 250;
+
+static const float ambOccFudgeFactor = 50;
+static const float castShadowFactor = 0.25;
+
+static const float3 lightDirection = normalize(float3(0.6, 0.5, 0.1));
+//float lightWidth = .01;
 
 struct Ray
 {
@@ -52,77 +58,6 @@ Ray CreateCameraRay(float2 xy)
 }
 
 
-
-float infiniteShapes(float3 Position)
-{
-	Position = ApplyAbsX(Position);
-	Position = ApplyModX(Position,2);
-	Position = ApplyAbsY(Position);
-	Position = ApplyModY(Position, 2);
-	Position = ApplyAbsZ(Position);
-	Position = ApplyModZ(Position, 2);
-
-	//return ApplyDETetra(Position, 0.5, float3(1, 1, 1));
-	return ApplyDESphere(Position, 0.5, float3(1, 1, 1));
-	//return ApplyDEBox(Position, float3(.5, .5, .5), float3(1, 1, 1));
-}
-
-
-float sierpinskiTetrahedron(float3 Position)
-{
-	float r;
-	int n = 0;
-	int Iterations = 10;
-	float Scale = 2; 
-	float3 Offset = float3(1, 1, 1);
-	while (n < Iterations) {
-		Position = ApplySierpinskiFold(Position);
-		Position = ApplyScaleTranslate(Position, Scale, Offset);
-		n++;
-	}
-
-	//float Distance = ApplyDESphere(Position, 1.0, float3(0, 0, 0));
-	float Distance = ApplyDETetra(Position, 1.0, float3(0, 0, 0));
-	//float Distance = ApplyDEBox(Position, float3(1,1,1), float3(1,1,1));
-
-	return Distance * pow(Scale, -float(n));
-}
-
-float mandelBox(float3 Position)
-{
-	int n = 0;
-	int Iterations = 16;
-
-	while (n < Iterations) {		
-		n++;
-		Position = ApplyBoxFold(Position, 1);
-		Position = ApplySphereFold(Position, .5, 1);
-	}
-
-	return ApplyDESphere(Position, 1, float3(1, 1, 1));
-	//return ApplyDEBox(Position, float3(1, 1, 1), float3(1, 1, 1));
-}
-
-float snowStadium(float3 Position)
-{
-	int n = 0;
-	int Iterations = 10;
-
-	while (n < Iterations) {
-		n++;
-
-
-	}
-}
-
-
-
-float EstimateNormalSphere(float3 Position, float3 Center, float3 lightDirection)
-{
-	float3 Normal = Position - Center;
-	return dot(Normal,lightDirection);
-}
-
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
@@ -146,9 +81,15 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	{
 		numMarchSteps++;
 
-		float minDistance = sierpinskiTetrahedron(cameraRay.Origin);
+		///// FUNCTIONAL FRACTALS ///////
+		float minDistance = mengerBox(cameraRay.Origin);
+		//float minDistance = sierpinskiTetrahedron(cameraRay.Origin);
 		//float minDistance = infiniteShapes(cameraRay.Origin);
+		//////////////////////////////////
+
+		//float minDistance = treePlanet(cameraRay.Origin);
 		//float minDistance = mandelBox(cameraRay.Origin);
+		//float minDistance = butterweedHills(cameraRay.Origin);
 
 		if (minDistance < cameraRay.closestPoint) {cameraRay.closestPoint = minDistance;}
 
@@ -156,13 +97,38 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
 		if (minDistance < epsilon)
 		{
-			//CODE WHEN RAY 'HITS' OBJECT
 			hit = true;
-			light =(float) numMarchSteps/ (float) maxNumMarchSteps;
-			//light = marchDistance/ maxMarchDistance;
-			//light = 1;
+			light = 1 -  (float)numMarchSteps / ambOccFudgeFactor;
 
 			Target[id.xy] = light* float4(1,0,0,0);
+			
+#if CAST_SHADOWS
+
+			Ray lightRay = CreateRay(cameraRay.Origin - 10 * epsilon * cameraRay.Direction, lightDirection );
+
+			float lightMarchDistance = 0;
+			int ligthNumMarchSteps = 0;
+
+			//Target[id.xy] = 0.0;
+
+			while (lightMarchDistance < maxMarchDistance && ligthNumMarchSteps < maxNumMarchSteps)
+			{
+				ligthNumMarchSteps++;
+
+				float minLightDistance = mengerBox(lightRay.Origin);
+				//float minLightDistance = treePlanet(lightRay.Origin);
+
+				if (minLightDistance < epsilon)
+				{
+					Target[id.xy] *= castShadowFactor;
+					break;
+				}
+
+				lightMarchDistance += minLightDistance;
+				lightRay.Origin += lightRay.Direction * minLightDistance;
+			}
+			
+#endif
 
 			break;
 		}
@@ -173,8 +139,11 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
 	if (!hit)
 	{
-		float4 Glow = (1 - cameraRay.closestPoint/.5 ) * float4(1,1,0,0);
+		float4 Glow = max((1 - cameraRay.closestPoint/.05 ) * float4(1,1,0,0), 0);
 		Target[id.xy] += Glow;
+
+
 	}
+
 
 }

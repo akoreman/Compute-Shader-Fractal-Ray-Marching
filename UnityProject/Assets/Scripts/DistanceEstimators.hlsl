@@ -21,8 +21,8 @@ float ApplyDETetra(float3 Position, float d, float3 c)
 float ApplyDEBox(float3 Position, float3 s, float3 c)
 {
 	float3 a = abs(Position - c) - s;
-	float md = min(max(max(Position.x, Position.y), Position.z),0);
+	float md = min(max(max(a.x, a.y), a.z),0);
 
-	return md + length(max(Position, 0));
+	return md + length(max(a, 0));
 }
 #endif
