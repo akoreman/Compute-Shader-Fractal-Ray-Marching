@@ -3,12 +3,13 @@ Work In Progress. Working on a program to use ray marching to render in real-tim
 
 **Currently Implemented:**
 - Unlit rendering of fractals composed of translated primitives.
+- Directional shadows by retracing from the point where a camera ray hits the geometry to the light source.
 - Surface glow implemented by visualising how close non-hitting rays get to the object.
+- Coarse ambient occlusion by using the number of marching steps as an analogue for the complexity of the geometry.
 
 **To do:**
 - Lit shading by normal vector approximation.
-- Visual effects: ambient occlusion, soft shadows.
-- Directional shadows.
+- Soft shadows.
 
 # Images
 
