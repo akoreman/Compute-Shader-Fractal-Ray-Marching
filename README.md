@@ -3,7 +3,7 @@ Work In Progress. Working on a program to use ray marching to render in real-tim
 
 **Currently Implemented:**
 - Unlit rendering of fractals composed of translated primitives.
-- Glow implemented by visualising how close non-hitting rays get to the object.
+- Surface glow implemented by visualising how close non-hitting rays get to the object.
 
 **To do:**
 - Lit shading by normal vector approximation.
