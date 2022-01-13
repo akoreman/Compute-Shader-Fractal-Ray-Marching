@@ -12,7 +12,7 @@ From scratch implemented render engine to use ray marching to render, in real-ti
 - Soft shadows.
 - Specular highlights.
 
-# Images
+# Screenshots
 
 
 <img src="https://raw.github.com/akoreman/WIP-Compute-Shader-Ray-Marching/main/images/Shadows.PNG" width="400">  
