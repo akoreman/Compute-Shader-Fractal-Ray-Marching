@@ -12,8 +12,12 @@ Work In Progress. Working on a program to use ray marching to render in real-tim
 
 # Images
 
+
+<img src="https://raw.github.com/akoreman/WIP-Compute-Shader-Ray-Marching/main/images/MengerSponge.PNG" width="400">  
+
+<img src="https://raw.github.com/akoreman/WIP-Compute-Shader-Ray-Marching/main/images/Shadows.PNG" width="400">  
+
 <img src="https://raw.github.com/akoreman/WIP-Compute-Shader-Ray-Marching/main/images/Spheres.PNG" width="400">  
 
 <img src="https://raw.github.com/akoreman/WIP-Compute-Shader-Ray-Marching/main/images/Tetra.PNG" width="400">  
 
-<img src="https://raw.github.com/akoreman/WIP-Compute-Shader-Ray-Marching/main/images/MengerSponge.PNG" width="400">  
