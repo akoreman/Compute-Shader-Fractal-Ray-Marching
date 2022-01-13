@@ -11,6 +11,11 @@ public class RayMarcher : MonoBehaviour
     [SerializeField]
     ComputeShader rayMarcher;
 
+    public bool CAST_SHADOWS = true;
+    public bool LIT_SHADING = true;
+    public bool AMBIENT_OCCLUSION = true;
+
+
     float movementSpeed;
     float rotationSpeed;
 
@@ -40,15 +45,15 @@ public class RayMarcher : MonoBehaviour
         rayMarcher.SetTexture(0, "Source", source);
         rayMarcher.SetTexture(0, "Target", target);
 
-        rayMarcher.EnableKeyword("CAST_SHADOWS");
+        if (CAST_SHADOWS) { rayMarcher.EnableKeyword("CAST_SHADOWS"); } else { rayMarcher.DisableKeyword("CAST_SHADOWS"); }
+        if (LIT_SHADING) { rayMarcher.EnableKeyword("LIT_SHADING"); } else { rayMarcher.DisableKeyword("LIT_SHADING"); }
+        if (AMBIENT_OCCLUSION) { rayMarcher.EnableKeyword("AMBIENT_OCCLUSION"); } else { rayMarcher.DisableKeyword("AMBIENT_OCCLUSION"); }
 
         int threadGroupsX = (int) Mathf.Ceil(camera.pixelWidth / 8.0f);
         int threadGroupsY = (int) Mathf.Ceil(camera.pixelHeight / 8.0f);
-
-      
+ 
         rayMarcher.Dispatch(0, threadGroupsX, threadGroupsY, 1);
-  
-        
+    
         Graphics.Blit(target, destination);
     }
 

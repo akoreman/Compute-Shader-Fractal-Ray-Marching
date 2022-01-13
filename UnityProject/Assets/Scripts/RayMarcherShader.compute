@@ -1,6 +1,8 @@
 
 #pragma kernel CSMain
 #pragma multi_compile __ CAST_SHADOWS
+#pragma multi_compile __ LIT_SHADING
+#pragma multi_compile __ AMBIENT_OCCLUSION
 
 // These are set from RayMarcher.cs /////////
 Texture2D<float4> Source;
@@ -17,7 +19,7 @@ float4 _CameraRotation;
 #include "DistanceEstimators.hlsl"
 #include "Fractals.hlsl"
 
-static const float epsilon = 0.0001;
+static const float epsilon = 0.001;
 static const float maxMarchDistance = 250;
 static const int maxNumMarchSteps = 250;
 
@@ -57,6 +59,33 @@ Ray CreateCameraRay(float2 xy)
 	return CreateRay(Origin,Direction);
 }
 
+// Source: https://www.iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
+float3 ApproxNormal(float3 Position, float dx)
+{
+	float3 normalVec = float3(0, 0, 0);
+
+	normalVec.x = mengerBox(Position + float3(dx, 0, 0));
+	normalVec.x -= mengerBox(Position - float3(dx, 0, 0));
+
+	normalVec.y = mengerBox(Position + float3(0, dx, 0));
+	normalVec.y -= mengerBox(Position - float3(0, dx, 0));
+
+	normalVec.z = mengerBox(Position + float3(0, 0, dx));
+	normalVec.z -= mengerBox(Position - float3(0, 0, dx));
+	
+	/*
+	normalVec.x = infiniteShapes(Position + float3(dx, 0, 0));
+	normalVec.x -= infiniteShapes(Position - float3(dx, 0, 0));
+
+	normalVec.y = infiniteShapes(Position + float3(0, dx, 0));
+	normalVec.y -= infiniteShapes(Position - float3(0, dx, 0));
+
+	normalVec.z = infiniteShapes(Position + float3(0, 0, dx));
+	normalVec.z -= infiniteShapes(Position - float3(0, 0, dx));
+	*/
+	return normalize(normalVec);
+}
+
 
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
@@ -93,14 +122,22 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
 		if (minDistance < cameraRay.closestPoint) {cameraRay.closestPoint = minDistance;}
 
-		float light;
+		float light = 1;
+		float lighting = 1;
 
 		if (minDistance < epsilon)
 		{
 			hit = true;
-			light = 1 -  (float)numMarchSteps / ambOccFudgeFactor;
 
-			Target[id.xy] = light* float4(1,0,0,0);
+#if AMBIENT_OCCLUSION
+			light = 1 -  (float)numMarchSteps / ambOccFudgeFactor;
+#endif
+
+#if LIT_SHADING
+			lighting = dot(ApproxNormal(cameraRay.Origin, 0.00001),lightDirection);
+#endif
+
+			Target[id.xy] = light * lighting * float4(1, 0, 0, 0);
 			
 #if CAST_SHADOWS
 
@@ -109,14 +146,13 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 			float lightMarchDistance = 0;
 			int ligthNumMarchSteps = 0;
 
-			//Target[id.xy] = 0.0;
-
 			while (lightMarchDistance < maxMarchDistance && ligthNumMarchSteps < maxNumMarchSteps)
 			{
 				ligthNumMarchSteps++;
 
 				float minLightDistance = mengerBox(lightRay.Origin);
 				//float minLightDistance = treePlanet(lightRay.Origin);
+				//float minLightDistance = infiniteShapes(lightRay.Origin);
 
 				if (minLightDistance < epsilon)
 				{
@@ -141,9 +177,6 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	{
 		float4 Glow = max((1 - cameraRay.closestPoint/.05 ) * float4(1,1,0,0), 0);
 		Target[id.xy] += Glow;
-
-
 	}
-
 
 }

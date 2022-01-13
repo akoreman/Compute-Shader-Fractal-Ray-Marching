@@ -61,6 +61,8 @@ float mengerBox(float3 Position)
 	}
 
 	float Distance = ApplyDEBox(Position, float3(2, 2, 2), float3(0, 0, 0));
+	//float Distance = ApplyDESphere(Position, 2.0, float3(0, 0, 0));
+	//float Distance = ApplyDETetra(Position, 2.0, float3(0, 0, 0));
 
 	return Distance * pow(Scale, -float(n));
 }
