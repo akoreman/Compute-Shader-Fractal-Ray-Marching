@@ -10,6 +10,7 @@ From scratch implemented render engine to use ray marching to render, in real-ti
 
 **To do:**
 - Soft shadows.
+- Specular highlights.
 
 # Images
 
