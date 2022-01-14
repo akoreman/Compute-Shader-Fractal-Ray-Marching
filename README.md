@@ -7,6 +7,7 @@ From scratch implemented render engine to use ray marching to render, in real-ti
 - Directional shadows by retracing from the point where a camera ray hits the geometry to the light source.
 - Surface glow implemented by visualising how close non-hitting rays get to the object.
 - Coarse ambient occlusion by using the number of marching steps as an analogue for the complexity of the geometry.
+- Position based coloring.
 
 **To do:**
 - Soft shadows.
@@ -21,6 +22,7 @@ From scratch implemented render engine to use ray marching to render, in real-ti
 
 <img src="https://raw.github.com/akoreman/WIP-Compute-Shader-Ray-Marching/main/images/Diffuse.PNG" width="400">
 
-
 <img src="https://raw.github.com/akoreman/WIP-Compute-Shader-Ray-Marching/main/images/Tetra.PNG" width="400">  
 
+<img src="https://raw.github.com/akoreman/WIP-Compute-Shader-Ray-Marching/main/images/coloring.PNG" width="400">  
+=
