@@ -25,4 +25,4 @@ From scratch implemented render engine to use ray marching to render, in real-ti
 <img src="https://raw.github.com/akoreman/WIP-Compute-Shader-Ray-Marching/main/images/Tetra.PNG" width="400">  
 
 <img src="https://raw.github.com/akoreman/WIP-Compute-Shader-Ray-Marching/main/images/coloring.PNG" width="400">  
-=
+
