@@ -108,7 +108,7 @@ float3 ApplyRotY(float3 Position, float Angle)
 	float s = sin(Angle);
 	float c = cos(Angle);
 
-	Position.x = c * Position.z - s * Position.z;
+	Position.x = c * Position.x - s * Position.z;
 	Position.z = c * Position.z + s * Position.x;
 
 	return Position;

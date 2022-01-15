@@ -3,6 +3,7 @@
 #pragma multi_compile __ CAST_SHADOWS
 #pragma multi_compile __ LIT_SHADING
 #pragma multi_compile __ AMBIENT_OCCLUSION
+#pragma multi_compile __ GLOW
 
 // These are set from RayMarcher.cs /////////
 Texture2D<float4> Source;
@@ -13,20 +14,24 @@ float4x4 _CameraInverseProj;
 
 float4 _CameraPosition;
 float4 _CameraRotation;
+
+float ambOccFudgeFactor;
+float castShadowFactor;
 ////////////////////////////////////////
 
 #include "Folds.hlsl"
 #include "DistanceEstimators.hlsl"
 #include "Fractals.hlsl"
 
-static const float epsilon = 0.001;
-static const float maxMarchDistance = 250;
-static const int maxNumMarchSteps = 250;
+static const float epsilon = 0.0001;
+static const float maxMarchDistance = 2*250;
+static const int maxNumMarchSteps = 2*250;
 
-static const float ambOccFudgeFactor = 50;
-static const float castShadowFactor = 0.25;
+//static const float ambOccFudgeFactor = 50;
+//static const float castShadowFactor = 0.25;
 
 static const float3 lightDirection = normalize(float3(0.6, 0.5, 0.1));
+//static const float3 lightDirection = normalize(float3(0, 1, 0));
 //float lightWidth = .01;
 
 struct Ray
@@ -59,33 +64,43 @@ Ray CreateCameraRay(float2 xy)
 	return CreateRay(Origin,Direction);
 }
 
+float3 GetMinDistance(float3 Position)
+{
+	///// FUNCTIONAL FRACTALS ///////
+	//float minDistance = mengerBox(Position);
+	//float minDistance = sierpinskiTetrahedron(Position);
+	//float minDistance = infiniteShapes(Position);
+	//////////////////////////////////
+
+	float minDistance = treePlanet(Position);
+	//float minDistance = Mausoleum(Position);
+	//float minDistance = butterweedHills(Position);
+
+	return minDistance;
+}
+
 // Source: https://www.iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
 float3 ApproxNormal(float3 Position, float dx)
 {
 	float3 normalVec = float3(0, 0, 0);
 
-	normalVec.x = mengerBox(Position + float3(dx, 0, 0));
-	normalVec.x -= mengerBox(Position - float3(dx, 0, 0));
+	normalVec.x = GetMinDistance(Position + float3(dx, 0, 0));
+	normalVec.x -= GetMinDistance(Position - float3(dx, 0, 0));
 
-	normalVec.y = mengerBox(Position + float3(0, dx, 0));
-	normalVec.y -= mengerBox(Position - float3(0, dx, 0));
+	normalVec.y = GetMinDistance(Position + float3(0, dx, 0));
+	normalVec.y -= GetMinDistance(Position - float3(0, dx, 0));
 
-	normalVec.z = mengerBox(Position + float3(0, 0, dx));
-	normalVec.z -= mengerBox(Position - float3(0, 0, dx));
+	normalVec.z = GetMinDistance(Position + float3(0, 0, dx));
+	normalVec.z -= GetMinDistance(Position - float3(0, 0, dx));
 	
-	/*
-	normalVec.x = infiniteShapes(Position + float3(dx, 0, 0));
-	normalVec.x -= infiniteShapes(Position - float3(dx, 0, 0));
-
-	normalVec.y = infiniteShapes(Position + float3(0, dx, 0));
-	normalVec.y -= infiniteShapes(Position - float3(0, dx, 0));
-
-	normalVec.z = infiniteShapes(Position + float3(0, 0, dx));
-	normalVec.z -= infiniteShapes(Position - float3(0, 0, dx));
-	*/
 	return normalize(normalVec);
 }
 
+float4 GetColor(float3 Position)
+{
+	return float4(1,0,0,0);
+	//return abs(float4(Position.x, Position.y, Position.z, 0));
+}
 
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
@@ -110,15 +125,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	{
 		numMarchSteps++;
 
-		///// FUNCTIONAL FRACTALS ///////
-		float minDistance = mengerBox(cameraRay.Origin);
-		//float minDistance = sierpinskiTetrahedron(cameraRay.Origin);
-		//float minDistance = infiniteShapes(cameraRay.Origin);
-		//////////////////////////////////
-
-		//float minDistance = treePlanet(cameraRay.Origin);
-		//float minDistance = mandelBox(cameraRay.Origin);
-		//float minDistance = butterweedHills(cameraRay.Origin);
+		float minDistance = GetMinDistance(cameraRay.Origin);
 
 		if (minDistance < cameraRay.closestPoint) {cameraRay.closestPoint = minDistance;}
 
@@ -134,10 +141,10 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 #endif
 
 #if LIT_SHADING
-			lighting = dot(ApproxNormal(cameraRay.Origin, 0.00001),lightDirection);
+			lighting = dot(ApproxNormal(cameraRay.Origin, 0.001),lightDirection);
 #endif
 
-			Target[id.xy] = light * lighting * float4(1, 0, 0, 0);
+			Target[id.xy] = light * lighting * GetColor(cameraRay.Origin); // abs(float4(cameraRay.Origin.x, cameraRay.Origin.y, cameraRay.Origin.z, 0));
 			
 #if CAST_SHADOWS
 
@@ -150,9 +157,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 			{
 				ligthNumMarchSteps++;
 
-				float minLightDistance = mengerBox(lightRay.Origin);
-				//float minLightDistance = treePlanet(lightRay.Origin);
-				//float minLightDistance = infiniteShapes(lightRay.Origin);
+				float minLightDistance = GetMinDistance(lightRay.Origin);
 
 				if (minLightDistance < epsilon)
 				{
@@ -173,10 +178,13 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 		cameraRay.Origin += cameraRay.Direction * minDistance;
 	}
 
+#if GLOW
+
 	if (!hit)
 	{
 		float4 Glow = max((1 - cameraRay.closestPoint/.05 ) * float4(1,1,0,0), 0);
 		Target[id.xy] += Glow;
 	}
+#endif
 
 }

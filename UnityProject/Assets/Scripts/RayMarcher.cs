@@ -12,8 +12,18 @@ public class RayMarcher : MonoBehaviour
     ComputeShader rayMarcher;
 
     public bool CAST_SHADOWS = true;
+
+    [Range(0.0f, 1.0f)]
+    public float castShadowFactor;
+
     public bool LIT_SHADING = true;
+
     public bool AMBIENT_OCCLUSION = true;
+
+    [Range(1f, 100.0f)]
+    public float ambOccFudgeFactor;
+
+    public bool GLOW = true;
 
 
     float movementSpeed;
@@ -42,15 +52,19 @@ public class RayMarcher : MonoBehaviour
         rayMarcher.SetVector("_CameraPosition", camera.transform.position);
         rayMarcher.SetVector("_CameraRotation", camera.transform.eulerAngles);
 
+        rayMarcher.SetFloat("castShadowFactor", castShadowFactor);
+        rayMarcher.SetFloat("ambOccFudgeFactor", ambOccFudgeFactor);
+
         rayMarcher.SetTexture(0, "Source", source);
         rayMarcher.SetTexture(0, "Target", target);
 
         if (CAST_SHADOWS) { rayMarcher.EnableKeyword("CAST_SHADOWS"); } else { rayMarcher.DisableKeyword("CAST_SHADOWS"); }
         if (LIT_SHADING) { rayMarcher.EnableKeyword("LIT_SHADING"); } else { rayMarcher.DisableKeyword("LIT_SHADING"); }
         if (AMBIENT_OCCLUSION) { rayMarcher.EnableKeyword("AMBIENT_OCCLUSION"); } else { rayMarcher.DisableKeyword("AMBIENT_OCCLUSION"); }
+        if (GLOW) { rayMarcher.EnableKeyword("GLOW"); } else { rayMarcher.DisableKeyword("GLOW"); }
 
-        int threadGroupsX = (int) Mathf.Ceil(camera.pixelWidth / 8.0f);
-        int threadGroupsY = (int) Mathf.Ceil(camera.pixelHeight / 8.0f);
+        int threadGroupsX = (int) Mathf.Ceil(camera.pixelWidth / 8f);
+        int threadGroupsY = (int) Mathf.Ceil(camera.pixelHeight / 8f);
  
         rayMarcher.Dispatch(0, threadGroupsX, threadGroupsY, 1);
     
@@ -84,19 +98,31 @@ public class RayMarcher : MonoBehaviour
             print(rotationSpeed);
         }
 
+        if (Input.GetKey("n"))
+        {
+            camera.transform.Rotate(new Vector3(0,0, rotationSpeed * Time.deltaTime));
+        }
+
+        if (Input.GetKey("m"))
+        {
+            camera.transform.Rotate(new Vector3(0,0, -rotationSpeed * Time.deltaTime));
+        }
+
         if (Input.GetKeyDown("r"))
         {
             camera.transform.localPosition = new Vector3(0f,0f,0f);
             camera.transform.eulerAngles = new Vector3(0f, 0f, 0f);
         }
 
-        Vector3 currentAngles = camera.transform.localEulerAngles;
+        //Vector3 currentAngles = camera.transform.localEulerAngles;
         Vector3 currentPosition = camera.transform.localPosition;
 
-        currentAngles.y += Input.GetAxis("Horizontal") * rotationSpeed * Time.deltaTime;
-        currentAngles.x -= Input.GetAxis("Vertical") * rotationSpeed * Time.deltaTime;
+        //currentAngles.y += Input.GetAxis("Horizontal") * rotationSpeed * Time.deltaTime;
+        camera.transform.Rotate(new Vector3(0, Input.GetAxis("Horizontal") * rotationSpeed * Time.deltaTime,0));
+        //currentAngles.x -= Input.GetAxis("Vertical") * rotationSpeed * Time.deltaTime;
+        camera.transform.Rotate(new Vector3(-Input.GetAxis("Vertical") * rotationSpeed * Time.deltaTime, 0,0));
 
-        camera.transform.localEulerAngles = currentAngles;
+        //camera.transform.localEulerAngles = currentAngles;
 
         if (Input.GetKey("space"))
         {

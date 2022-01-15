@@ -1,6 +1,7 @@
 #ifndef FRACTALS_DEFINED
 #define FRACTALS_DEFINED
 
+#define PI 3.14159265358979
 
 ///////////// FUNCTIONAL FRACTALS //////////////////////
 
@@ -93,48 +94,56 @@ float butterweedHills(float3 Position)
 		Position = ApplyRotY(Position, 2.03);
 	}
 
-	return ApplyDESphere(Position, 1, float3(0, 0, 0));// *pow(Scale, -float(n));
+	return ApplyDESphere(Position, 1, float3(0, 0, 0)) *pow(Scale, -float(n));
 }
 
-float mandelBox(float3 Position)
+
+float Mausoleum(float3 Position)
 {
 	int n = 0;
-	float Scale = 1.5;
+	float Scale = 5;
 
-	while (n < 3) {
+	while (n < 4) {
 		n++;
-		Position = ApplyBoxFold(Position, 1);
-		Position = ApplySphereFold(Position, .5, 1);
+
+		Position = ApplyBoxFold(Position, 0.34);
+		Position = ApplyMengerFold(Position);
+
+		Position = ApplyScaleTranslate(Position, 3.28, float3(-5.27, -0.34, 0.0));
+		Position = ApplyRotX(Position, PI / 2);
 	}
 
 	//return ApplyDESphere(Position, 1, float3(1, 1, 1)) * pow(Scale, -float(n));
-	return ApplyDEBox(Position, float3(6, 6, 6), float3(1, 1, 1)) * pow(Scale, -float(n));
+	return ApplyDEBox(Position, float3(2, 2, 2), float3(0, 0, 0)) * pow(Scale, -float(n));
 
 }
 
 float treePlanet(float3 Position)
 {
 	int n = 0;
-	int Iterations = 3;
-	float Scale = 3.0;
 
-	while (n < 1) {
+	float Scale = 1.3;
+
+	while (n < 40) {
 		n++;
 
 		Position = ApplyRotY(Position,0.44);
-
+		
 		Position = ApplyAbsX(Position);
 		Position = ApplyAbsY(Position);
 		Position = ApplyAbsZ(Position);
 
 		Position = ApplyMengerFold(Position);
-
+		
 		Position = ApplyScaleTranslate(Position, 1.3,float3(-2,-4.8,0));
-
+		//Scale *= Scale;
 		Position = ApplyNFold(Position, float3(0, 0, -1), 0);
+		
 	}
 
 	return ApplyDEBox(Position, float3(4.8, 4.8, 4.8), float3(0, 0, 0)) * pow(Scale, -float(n));
+	//return ApplyDEBox(Position, float3(1, 1, 1), float3(0, 0, 0)) * pow(Scale, -float(n));
 
 }
+
 #endif

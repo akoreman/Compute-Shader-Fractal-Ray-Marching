@@ -413,6 +413,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rayMarcher: {fileID: 7200000, guid: 96afb793942571e4fa3d2ef65da379d2, type: 3}
+  CAST_SHADOWS: 1
+  castShadowFactor: 0.25
+  LIT_SHADING: 0
+  AMBIENT_OCCLUSION: 1
+  ambOccFudgeFactor: 25
+  GLOW: 1
 --- !u!1 &1224754027
 GameObject:
   m_ObjectHideFlags: 0
