@@ -10,7 +10,7 @@ From scratch implemented render engine to use ray marching to render, in real-ti
 - Position based coloring.
 
 **To do:**
-- Soft shadows.
+- Soft shadows by keeping track of the 'width' of the lightbeam.
 - Specular highlights.
 - Add more fractal recipes.
 
