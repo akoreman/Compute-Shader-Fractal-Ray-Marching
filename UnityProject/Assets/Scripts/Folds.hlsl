@@ -19,11 +19,11 @@ float3 ApplySierpinskiFold(float3 Position)
 
 float3 ApplyMengerFold(float3 Position)
 {
-	if (Position.x < Position.y) { Position.xy = Position.yx; }
-	if (Position.x < Position.z) { Position.xz = Position.zx; }
-	if (Position.y < Position.z) { Position.zy = Position.yz; }
+	//if (Position.x < Position.y) { Position.xy = Position.yx; }
+	//if (Position.x < Position.z) { Position.xz = Position.zx; }
+	//if (Position.y < Position.z) { Position.zy = Position.yz; }
 
-	/*
+	
 	float a = min(Position.x - Position.y, 0);
 	Position.x -= a;
 	Position.y += a;
@@ -35,7 +35,7 @@ float3 ApplyMengerFold(float3 Position)
 	a = min(Position.y - Position.z, 0);
 	Position.y -= a;
 	Position.z += a;
-	*/
+	
 
 	return Position;
 }

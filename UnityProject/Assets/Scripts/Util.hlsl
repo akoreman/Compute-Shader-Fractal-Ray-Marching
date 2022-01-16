@@ -3,15 +3,8 @@
 
 float ClipToRange(float v, float r)
 {
-	if (v > r)
-	{
-		return r;
-	}
-
-	if (v < -r)
-	{
-		return -r;
-	}
+	if (v > r) { return r; }
+	if (v < -r) { return -r; }
 
 	return v;
 }

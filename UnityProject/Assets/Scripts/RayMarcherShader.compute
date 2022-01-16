@@ -24,11 +24,12 @@ float castShadowFactor;
 #include "DistanceEstimators.hlsl"
 #include "Fractals.hlsl"
 
+// Accuracy parameters.
 static const float epsilon = 0.0001 / 1;
 static const float maxMarchDistance = 1*250;
 static const int maxNumMarchSteps = 1*250;
 
-
+// Light direction.
 static const float3 lightDirection = normalize(float3(0.6, 0.5, 0.1));
 
 struct Ray
@@ -70,6 +71,7 @@ float3 GetMinDistance(float3 Position)
 	//float minDistance = infiniteShapes(Position);
 	//////////////////////////////////
 
+	// Work in Progress
 	//float minDistance = treePlanet(Position);
 	//float minDistance = Mausoleum(Position);
 	//float minDistance = butterweedHills(Position);
