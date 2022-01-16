@@ -3,6 +3,8 @@
 
 #define PI 3.14159265358979
 
+// Combine the space folds with the distance estimators to create fractal recipes.
+
 ///////////// FUNCTIONAL FRACTALS //////////////////////
 
 float infiniteShapes(float3 Position)
@@ -27,7 +29,7 @@ float sierpinskiTetrahedron(float3 Position)
 
 	int n = 0;
 
-	while (n < 11) {
+	while (n < 9) {
 		Position = ApplySierpinskiFold(Position);
 		Position = ApplyScaleTranslate(Position, Scale, float3(-1, -1, -1));
 		n++;
@@ -56,7 +58,7 @@ float mengerBox(float3 Position)
 
 		Position = ApplyMengerFold(Position);
 
-		Position = ApplyScaleTranslate(Position, 3, float3(-2, -2, 0));
+		Position = ApplyScaleTranslate(Position, Scale, float3(-2, -2, 0));
 
 		Position = ApplyNFold(Position, float3(0, 0, -1), -1);
 	}
@@ -75,68 +77,26 @@ float mengerBox(float3 Position)
 
 ///////////////// WORK IN PROGRESS /////////////////////////////////////////////
 
-float butterweedHills(float3 Position)
-{
-	int n = 0;
-
-	float Scale = 1.5;
-
-	while (n < 30)
-	{
-		n++;
-		Position = ApplyAbsX(Position);
-		Position = ApplyAbsY(Position);
-		Position = ApplyAbsZ(Position);
-
-		Position = ApplyScaleTranslate(Position, Scale, float3(-1, -0.5, -0.2));
-
-		Position = ApplyRotX(Position, 3.61);
-		Position = ApplyRotY(Position, 2.03);
-	}
-
-	return ApplyDESphere(Position, 1, float3(0, 0, 0)) *pow(Scale, -float(n));
-}
-
-
-float Mausoleum(float3 Position)
-{
-	int n = 0;
-	float Scale = 5;
-
-	while (n < 4) {
-		n++;
-
-		Position = ApplyBoxFold(Position, 0.34);
-		Position = ApplyMengerFold(Position);
-
-		Position = ApplyScaleTranslate(Position, 3.28, float3(-5.27, -0.34, 0.0));
-		Position = ApplyRotX(Position, PI / 2);
-	}
-
-	//return ApplyDESphere(Position, 1, float3(1, 1, 1)) * pow(Scale, -float(n));
-	return ApplyDEBox(Position, float3(2, 2, 2), float3(0, 0, 0)) * pow(Scale, -float(n));
-
-}
-
+// Fractal recipe from https://github.com/HackerPoet/PySpace .
 float treePlanet(float3 Position)
 {
 	int n = 0;
 
 	float Scale = 1.3;
 
-	while (n < 40) {
+	while (n < 30) {
 		n++;
 
 		Position = ApplyRotY(Position,0.44);
-		
+
 		Position = ApplyAbsX(Position);
 		Position = ApplyAbsY(Position);
 		Position = ApplyAbsZ(Position);
 
 		Position = ApplyMengerFold(Position);
 		
-		Position = ApplyScaleTranslate(Position, 1.3,float3(-2,-4.8,0));
-		//Scale *= Scale;
+		Position = ApplyScaleTranslate(Position, Scale, float3(-2, -4.8, 0));
+
 		Position = ApplyNFold(Position, float3(0, 0, -1), 0);
 		
 	}
@@ -145,5 +105,8 @@ float treePlanet(float3 Position)
 	//return ApplyDEBox(Position, float3(1, 1, 1), float3(0, 0, 0)) * pow(Scale, -float(n));
 
 }
+
+
+
 
 #endif

@@ -19,20 +19,17 @@ float ambOccFudgeFactor;
 float castShadowFactor;
 ////////////////////////////////////////
 
+#include "Util.hlsl"
 #include "Folds.hlsl"
 #include "DistanceEstimators.hlsl"
 #include "Fractals.hlsl"
 
-static const float epsilon = 0.0001;
-static const float maxMarchDistance = 2*250;
-static const int maxNumMarchSteps = 2*250;
+static const float epsilon = 0.0001 / 1;
+static const float maxMarchDistance = 1*250;
+static const int maxNumMarchSteps = 1*250;
 
-//static const float ambOccFudgeFactor = 50;
-//static const float castShadowFactor = 0.25;
 
 static const float3 lightDirection = normalize(float3(0.6, 0.5, 0.1));
-//static const float3 lightDirection = normalize(float3(0, 1, 0));
-//float lightWidth = .01;
 
 struct Ray
 {
@@ -64,22 +61,24 @@ Ray CreateCameraRay(float2 xy)
 	return CreateRay(Origin,Direction);
 }
 
+// Set which fractal is going to be rendered.
 float3 GetMinDistance(float3 Position)
 {
 	///// FUNCTIONAL FRACTALS ///////
-	//float minDistance = mengerBox(Position);
+	float minDistance = mengerBox(Position);
 	//float minDistance = sierpinskiTetrahedron(Position);
 	//float minDistance = infiniteShapes(Position);
 	//////////////////////////////////
 
-	float minDistance = treePlanet(Position);
+	//float minDistance = treePlanet(Position);
 	//float minDistance = Mausoleum(Position);
 	//float minDistance = butterweedHills(Position);
+	//float minDistance = mandelBox(Position);
 
 	return minDistance;
 }
 
-// Source: https://www.iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
+// Approximate normals by using central difference, source: https://www.iquilezles.org/www/articles/normalsSDF/normalsSDF.htm .
 float3 ApproxNormal(float3 Position, float dx)
 {
 	float3 normalVec = float3(0, 0, 0);
@@ -96,12 +95,14 @@ float3 ApproxNormal(float3 Position, float dx)
 	return normalize(normalVec);
 }
 
+// Set what basecolour each pixel shoud start out with.
 float4 GetColor(float3 Position)
 {
 	return float4(1,0,0,0);
-	//return abs(float4(Position.x, Position.y, Position.z, 0));
+	//return abs(float4(Position.x, Position.y, Position.z, 0))/10 + float4(.1,.1,.1,0);
 }
 
+// Main thread.
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
@@ -144,10 +145,11 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 			lighting = dot(ApproxNormal(cameraRay.Origin, 0.001),lightDirection);
 #endif
 
-			Target[id.xy] = light * lighting * GetColor(cameraRay.Origin); // abs(float4(cameraRay.Origin.x, cameraRay.Origin.y, cameraRay.Origin.z, 0));
+			Target[id.xy] = light * lighting * GetColor(cameraRay.Origin); 
 			
 #if CAST_SHADOWS
 
+			// Create a ray from the collision point to the light to check for occlusion.
 			Ray lightRay = CreateRay(cameraRay.Origin - 10 * epsilon * cameraRay.Direction, lightDirection );
 
 			float lightMarchDistance = 0;
@@ -167,10 +169,8 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
 				lightMarchDistance += minLightDistance;
 				lightRay.Origin += lightRay.Direction * minLightDistance;
-			}
-			
+			}			
 #endif
-
 			break;
 		}
 	

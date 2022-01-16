@@ -25,12 +25,12 @@ public class RayMarcher : MonoBehaviour
 
     public bool GLOW = true;
 
-
     float movementSpeed;
     float rotationSpeed;
 
     void Awake()
     {
+        // Default movement speeds.
         movementSpeed = 0.1f;
         rotationSpeed = 60f;
     }
@@ -39,6 +39,7 @@ public class RayMarcher : MonoBehaviour
     {
         camera = Camera.current;
 
+        // If no render target defined, set one up.
         if (target == null)
         {
             target = new RenderTexture(camera.pixelWidth, camera.pixelHeight, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
@@ -47,6 +48,7 @@ public class RayMarcher : MonoBehaviour
             target.Create();
         }
 
+        // Send stuff to the computer shader.
         rayMarcher.SetMatrix("_CameraToWorldProj", camera.cameraToWorldMatrix);
         rayMarcher.SetMatrix("_CameraInverseProj", camera.projectionMatrix.inverse);
         rayMarcher.SetVector("_CameraPosition", camera.transform.position);
@@ -58,6 +60,7 @@ public class RayMarcher : MonoBehaviour
         rayMarcher.SetTexture(0, "Source", source);
         rayMarcher.SetTexture(0, "Target", target);
 
+        // Set keywords for the compute shader.
         if (CAST_SHADOWS) { rayMarcher.EnableKeyword("CAST_SHADOWS"); } else { rayMarcher.DisableKeyword("CAST_SHADOWS"); }
         if (LIT_SHADING) { rayMarcher.EnableKeyword("LIT_SHADING"); } else { rayMarcher.DisableKeyword("LIT_SHADING"); }
         if (AMBIENT_OCCLUSION) { rayMarcher.EnableKeyword("AMBIENT_OCCLUSION"); } else { rayMarcher.DisableKeyword("AMBIENT_OCCLUSION"); }
@@ -66,8 +69,8 @@ public class RayMarcher : MonoBehaviour
         int threadGroupsX = (int) Mathf.Ceil(camera.pixelWidth / 8f);
         int threadGroupsY = (int) Mathf.Ceil(camera.pixelHeight / 8f);
  
+        // Run the compute shdader and render the final texture to screen.
         rayMarcher.Dispatch(0, threadGroupsX, threadGroupsY, 1);
-    
         Graphics.Blit(target, destination);
     }
 
@@ -114,24 +117,32 @@ public class RayMarcher : MonoBehaviour
             camera.transform.eulerAngles = new Vector3(0f, 0f, 0f);
         }
 
-        //Vector3 currentAngles = camera.transform.localEulerAngles;
         Vector3 currentPosition = camera.transform.localPosition;
 
-        //currentAngles.y += Input.GetAxis("Horizontal") * rotationSpeed * Time.deltaTime;
         camera.transform.Rotate(new Vector3(0, Input.GetAxis("Horizontal") * rotationSpeed * Time.deltaTime,0));
-        //currentAngles.x -= Input.GetAxis("Vertical") * rotationSpeed * Time.deltaTime;
         camera.transform.Rotate(new Vector3(-Input.GetAxis("Vertical") * rotationSpeed * Time.deltaTime, 0,0));
-
-        //camera.transform.localEulerAngles = currentAngles;
 
         if (Input.GetKey("space"))
         {
             Vector3 Direction = camera.transform.forward;
-
             currentPosition += Direction * movementSpeed * Time.deltaTime;
         }
 
+        if (Input.GetKey(KeyCode.LeftControl))
+        {
+            Vector3 Direction = camera.transform.forward;
+            currentPosition -= Direction * movementSpeed * Time.deltaTime;
+        }
+
         camera.transform.localPosition = currentPosition;
+
+        if (Input.GetKey("escape"))
+        {
+            Application.Quit();
+        }
+
+
+       
     }
 
 }

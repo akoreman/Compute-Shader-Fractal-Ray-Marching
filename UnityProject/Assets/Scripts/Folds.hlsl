@@ -1,20 +1,7 @@
 #ifndef FOLDS_DEFINED
 #define FOLDS_DEFINED
 
-float ClipToRange(float v, float r)
-{
-	if (v > r)
-	{
-		return r;
-	}
-
-	if (v < -r)
-	{
-		return -r;
-	}
-
-	return v;
-}
+// Apply space transformations to the position vectors of rays.
 
 float3 ApplyScaleTranslate(float3 Position, float Scale, float3 Offset)
 {
@@ -32,9 +19,23 @@ float3 ApplySierpinskiFold(float3 Position)
 
 float3 ApplyMengerFold(float3 Position)
 {
-	if (Position.x < Position.y) Position.xy = Position.yx;
-	if (Position.x < Position.z) Position.xz = Position.zx;
-	if (Position.y < Position.z) Position.zy = Position.yz;
+	if (Position.x < Position.y) { Position.xy = Position.yx; }
+	if (Position.x < Position.z) { Position.xz = Position.zx; }
+	if (Position.y < Position.z) { Position.zy = Position.yz; }
+
+	/*
+	float a = min(Position.x - Position.y, 0);
+	Position.x -= a;
+	Position.y += a;
+
+	a = min(Position.x - Position.z, 0);
+	Position.x -= a;
+	Position.z += a;
+
+	a = min(Position.y - Position.z, 0);
+	Position.y -= a;
+	Position.z += a;
+	*/
 
 	return Position;
 }
@@ -127,7 +128,7 @@ float3 ApplyRotZ(float3 Position, float Angle)
 
 float3 ApplyNFold(float3 Position, float3 n, float d)
 {
-	Position -= 2 * min(0, dot(Position, n) - d) * n;
+	Position -= 2.0 * min(0.0, dot(Position, n) - d) * n;
 
 	return Position;
 }
