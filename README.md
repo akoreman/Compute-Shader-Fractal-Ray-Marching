@@ -1,5 +1,5 @@
 # Compute Shader Ray Marching
-From scratch implemented render engine to use ray marching to render, in real-time, 3D fractals composed of (conformally) transformed primitives. Implemented using HLSL compute shaders through Unity3D. Unity is used to render the final image to screen and to handle user input. Inspired by http://blog.hvidtfeldts.net/index.php/2011/06/distance-estimated-3d-fractals-part-i/ .
+Render engine to use ray marching to render, in real-time, 3D fractals composed of (conformally) transformed primitives. Implemented using HLSL compute shaders through Unity3D. Unity is used to render the final image to screen and to handle user input. Inspired by http://blog.hvidtfeldts.net/index.php/2011/06/distance-estimated-3d-fractals-part-i/ .
 
 **Currently Implemented:**
 - Unlit shading.
