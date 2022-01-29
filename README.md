@@ -9,7 +9,7 @@ Render engine to use ray marching to render, in real-time, 3D fractals composed 
 - Coarse ambient occlusion by using the number of marching steps as an analogue for the complexity of the geometry.
 - Position based coloring.
 
-**To do:**
+**Possible extensions:**
 - Soft shadows by keeping track of the 'width' of the lightbeam.
 - Add more fractal recipes.
 
