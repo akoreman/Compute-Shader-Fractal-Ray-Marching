@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// ATTACH THIS SCRIPT TO THE MAIN CAMERA.
 
 public class RayMarcher : MonoBehaviour
 {
@@ -24,10 +25,10 @@ public class RayMarcher : MonoBehaviour
 
     // Shadow contorl parameters.
     [SerializeField, Range(0.0f, 1.0f)]
-    float castShadowFactor;
+    float castShadowFactor = 0.25f;
 
     [SerializeField, Range(1f, 100.0f)]
-    float ambientOcclusionFactor;
+    float ambientOcclusionFactor = 80f;
 
     float movementSpeed;
     float rotationSpeed;
