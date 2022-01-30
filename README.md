@@ -11,7 +11,7 @@ Render engine to use ray marching to render, in real-time, 3D fractals composed 
 - Color based visualisation of rendering complexity for each pixel by keeping track how many marches are required to terminate.
 
 **Possible extensions:**
-- Soft shadows by keeping track of the 'width' of the lightbeam.
+<!-- - Soft shadows by keeping track of the 'width' of the lightbeam. -->
 - Add more fractal recipes.
 
 # Screenshots
