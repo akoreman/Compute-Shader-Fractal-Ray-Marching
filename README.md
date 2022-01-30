@@ -8,6 +8,7 @@ Render engine to use ray marching to render, in real-time, 3D fractals composed 
 - Surface glow implemented by visualising how close non-hitting rays get to the geometry.
 - Coarse ambient occlusion by using the number of marching steps as an analogue for the complexity of the geometry.
 - Position based coloring.
+- Color based visualisation of rendering complexity for each pixel by keeping track how many marches are required to terminate.
 
 **Possible extensions:**
 - Soft shadows by keeping track of the 'width' of the lightbeam.
