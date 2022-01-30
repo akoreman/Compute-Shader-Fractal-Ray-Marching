@@ -7,67 +7,70 @@
 
 ///////////// FUNCTIONAL FRACTALS //////////////////////
 
-float infiniteShapes(float3 Position)
+float InfiniteShapes(float3 position)
 {
-	Position = ApplyAbsX(Position);
-	Position = ApplyModX(Position, 2);
-	Position = ApplyAbsY(Position);
-	Position = ApplyModY(Position, 2);
-	Position = ApplyAbsZ(Position);
-	Position = ApplyModZ(Position, 2);
+	position = ApplyAbsX(position);
+	position = ApplyModX(position, 2);
+	position = ApplyAbsY(position);
+	position = ApplyModY(position, 2);
+	position = ApplyAbsZ(position);
+	position = ApplyModZ(position, 2);
 
-	//return ApplyDETetra(Position, 0.5, float3(1, 1, 1));
-	return ApplyDESphere(Position, 0.5, float3(1, 1, 1));
-	//return ApplyDEBox(Position, float3(.5, .5, .5), float3(1, 1, 1));
+	//return ApplyDETetra(position, 0.5, float3(1, 1, 1));
+	return ApplyDESphere(position, 0.5, float3(1, 1, 1));
+	//return ApplyDEBox(position, float3(.5, .5, .5), float3(1, 1, 1));
 }
 
-float sierpinskiTetrahedron(float3 Position)
+float SierpinskiTetrahedron(float3 position)
 {
 	//// SCALE HAS TO BE 2 ////////////
-	float Scale = 2;
+	float scale = 2;
 	//////////////////////////////////
 
 	int n = 0;
 
-	while (n < 9) {
-		Position = ApplySierpinskiFold(Position);
-		Position = ApplyScaleTranslate(Position, Scale, float3(-1, -1, -1));
+	while (n < 9) 
+	{
+		position = ApplySierpinskiFold(position);
+		position = ApplyScaleTranslate(position, scale, float3(-1, -1, -1));
 		n++;
 	}
 
-	//float Distance = ApplyDESphere(Position, 1.0, float3(0, 0, 0));
-	float Distance = ApplyDETetra(Position, 1.0, float3(0, 0, 0));
-	//float Distance = ApplyDEBox(Position, float3(1,1,1), float3(1,1,1));
+	//float Distance = ApplyDESphere(position, 1.0, float3(0, 0, 0));
+	float Distance = ApplyDETetra(position, 1.0, float3(0, 0, 0));
+	//float Distance = ApplyDEBox(position, float3(1,1,1), float3(1,1,1));
 
-	return Distance * pow(Scale, -float(n));
+	return Distance * pow(scale, -float(n));
 }
 
-float mengerBox(float3 Position)
+float MengerBox(float3 position)
 {
 	//// SCALE HAS TO BE 3 ////////////
-	float Scale = 3;
+	float scale = 3;
 	//////////////////////////////////
 
 	int n = 0;
 
-	while (n < 8) {
+	while (n < 8) 
+	{
 		n++;
-		Position = ApplyAbsX(Position);
-		Position = ApplyAbsY(Position);
-		Position = ApplyAbsZ(Position);
 
-		Position = ApplyMengerFold(Position);
+		position = ApplyAbsX(position);
+		position = ApplyAbsY(position);
+		position = ApplyAbsZ(position);
 
-		Position = ApplyScaleTranslate(Position, Scale, float3(-2, -2, 0));
+		position = ApplyMengerFold(position);
 
-		Position = ApplyNFold(Position, float3(0, 0, -1), -1);
+		position = ApplyScaleTranslate(position, scale, float3(-2, -2, 0));
+
+		position = ApplyNFold(position, float3(0, 0, -1), -1);
 	}
 
-	float Distance = ApplyDEBox(Position, float3(2, 2, 2), float3(0, 0, 0));
-	//float Distance = ApplyDESphere(Position, 2.0, float3(0, 0, 0));
-	//float Distance = ApplyDETetra(Position, 2.0, float3(0, 0, 0));
+	float Distance = ApplyDEBox(position, float3(2, 2, 2), float3(0, 0, 0));
+	//float Distance = ApplyDESphere(position, 2.0, float3(0, 0, 0));
+	//float Distance = ApplyDETetra(position, 2.0, float3(0, 0, 0));
 
-	return Distance * pow(Scale, -float(n));
+	return Distance * pow(scale, -float(n));
 }
 
 
@@ -78,32 +81,52 @@ float mengerBox(float3 Position)
 ///////////////// WORK IN PROGRESS /////////////////////////////////////////////
 
 // Fractal recipe from https://github.com/HackerPoet/PySpace .
-float treePlanet(float3 Position)
+float TreePlanet(float3 position)
 {
 	int n = 0;
 
-	float Scale = 1.3;
+	float scale = 1.3;
 
-	while (n < 30) {
+	while (n < 40) 
+	{
 		n++;
 
-		Position = ApplyRotY(Position,0.44);
+		position = ApplyRotY(position,0.44);
 
-		Position = ApplyAbsX(Position);
-		Position = ApplyAbsY(Position);
-		Position = ApplyAbsZ(Position);
+		position = ApplyAbsX(position);
+		position = ApplyAbsY(position);
+		position = ApplyAbsZ(position);
 
-		Position = ApplyMengerFold(Position);
+		position = ApplyMengerFold(position);
 		
-		Position = ApplyScaleTranslate(Position, Scale, float3(-2, -4.8, 0));
+		position = ApplyScaleTranslate(position, scale, float3(-2, -4.8, 0));
 
-		Position = ApplyNFold(Position, float3(0, 0, -1), 0);
+		position = ApplyNFold(position, float3(0, 0, -1), 0);
 		
 	}
 
-	return ApplyDEBox(Position, float3(4.8, 4.8, 4.8), float3(0, 0, 0)) * pow(Scale, -float(n));
-	//return ApplyDEBox(Position, float3(1, 1, 1), float3(0, 0, 0)) * pow(Scale, -float(n));
+	return ApplyDEBox(position, float3(4.8, 4.8, 4.8), float3(0, 0, 0)) * pow(scale, -float(n));
+	//return ApplyDEBox(position, float3(1, 1, 1), float3(0, 0, 0)) * pow(scale, -float(n));
 
+}
+
+float SnowStadium(float3 position)
+{
+	int n = 0;
+	float scale = 1.57;
+
+	while (n < 40)
+	{
+		n++;
+
+		position = ApplyRotY(position, 3.33);
+		position = ApplySierpinskiFold(position);
+		position = ApplyRotX(position, 0.15);
+		position = ApplyMengerFold(position);
+		position = ApplyScaleTranslate(position, scale, float3(-6.61f, .4f, -2.32f));
+	}
+
+	return ApplyDEBox(position, float3(4.8, 4.8, 4.8), float3(0, 0, 0)) * pow(scale, -float(n));
 }
 
 

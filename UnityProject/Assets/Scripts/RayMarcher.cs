@@ -5,28 +5,35 @@ using UnityEngine;
 
 public class RayMarcher : MonoBehaviour
 {
-    RenderTexture target;
-    Camera camera;
-
     [SerializeField]
     ComputeShader rayMarcher;
 
-    public bool CAST_SHADOWS = true;
+    // Compute shader compiler flags. //////
+    [SerializeField]
+    bool CAST_SHADOWS = true;
 
-    [Range(0.0f, 1.0f)]
-    public float castShadowFactor;
+    [SerializeField]
+    bool LIT_SHADING = true;
 
-    public bool LIT_SHADING = true;
+    [SerializeField]
+    bool AMBIENT_OCCLUSION = true;
 
-    public bool AMBIENT_OCCLUSION = true;
+    [SerializeField]
+    bool GLOW = true;
+    /////////////////////////////////
 
-    [Range(1f, 100.0f)]
-    public float ambOccFudgeFactor;
+    // Shadow contorl parameters.
+    [SerializeField, Range(0.0f, 1.0f)]
+    float castShadowFactor;
 
-    public bool GLOW = true;
+    [SerializeField, Range(1f, 100.0f)]
+    float ambientOcclusionFactor;
 
     float movementSpeed;
     float rotationSpeed;
+
+    RenderTexture target;
+    Camera camera;
 
     void Awake()
     {
@@ -49,16 +56,16 @@ public class RayMarcher : MonoBehaviour
         }
 
         // Send stuff to the computer shader.
-        rayMarcher.SetMatrix("_CameraToWorldProj", camera.cameraToWorldMatrix);
-        rayMarcher.SetMatrix("_CameraInverseProj", camera.projectionMatrix.inverse);
-        rayMarcher.SetVector("_CameraPosition", camera.transform.position);
-        rayMarcher.SetVector("_CameraRotation", camera.transform.eulerAngles);
+        rayMarcher.SetMatrix("_cameraToWorldProj", camera.cameraToWorldMatrix);
+        rayMarcher.SetMatrix("_cameraInverseProj", camera.projectionMatrix.inverse);
+        rayMarcher.SetVector("_cameraPosition", camera.transform.position);
+        rayMarcher.SetVector("_cameraRotation", camera.transform.eulerAngles);
 
-        rayMarcher.SetFloat("castShadowFactor", castShadowFactor);
-        rayMarcher.SetFloat("ambOccFudgeFactor", ambOccFudgeFactor);
+        rayMarcher.SetFloat("_castShadowFactor", castShadowFactor);
+        rayMarcher.SetFloat("_ambientOcclusionFactor", ambientOcclusionFactor);
 
-        rayMarcher.SetTexture(0, "Source", source);
-        rayMarcher.SetTexture(0, "Target", target);
+        rayMarcher.SetTexture(0, "_source", source);
+        rayMarcher.SetTexture(0, "_target", target);
 
         // Set keywords for the compute shader.
         if (CAST_SHADOWS) { rayMarcher.EnableKeyword("CAST_SHADOWS"); } else { rayMarcher.DisableKeyword("CAST_SHADOWS"); }
@@ -74,6 +81,7 @@ public class RayMarcher : MonoBehaviour
         Graphics.Blit(target, destination);
     }
 
+    // Handle the camera movement.
     void Update()
     {
         if (Input.GetKeyDown("x"))
@@ -124,14 +132,14 @@ public class RayMarcher : MonoBehaviour
 
         if (Input.GetKey("space"))
         {
-            Vector3 Direction = camera.transform.forward;
-            currentPosition += Direction * movementSpeed * Time.deltaTime;
+            Vector3 direction = camera.transform.forward;
+            currentPosition += direction * movementSpeed * Time.deltaTime;
         }
 
         if (Input.GetKey(KeyCode.LeftControl))
         {
-            Vector3 Direction = camera.transform.forward;
-            currentPosition -= Direction * movementSpeed * Time.deltaTime;
+            Vector3 direction = camera.transform.forward;
+            currentPosition -= direction * movementSpeed * Time.deltaTime;
         }
 
         camera.transform.localPosition = currentPosition;

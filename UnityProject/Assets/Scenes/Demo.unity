@@ -393,7 +393,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: 20}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -414,11 +414,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rayMarcher: {fileID: 7200000, guid: 96afb793942571e4fa3d2ef65da379d2, type: 3}
   CAST_SHADOWS: 1
-  castShadowFactor: 0.25
   LIT_SHADING: 0
   AMBIENT_OCCLUSION: 1
-  ambOccFudgeFactor: 25
   GLOW: 1
+  castShadowFactor: 0.25
+  ambientOcclusionFactor: 0
 --- !u!1 &1224754027
 GameObject:
   m_ObjectHideFlags: 0

@@ -3,134 +3,134 @@
 
 // Apply space transformations to the position vectors of rays.
 
-float3 ApplyScaleTranslate(float3 Position, float Scale, float3 Offset)
+float3 ApplyScaleTranslate(float3 position, float scale, float3 offset)
 {
-	return Position * Scale + Offset;
+	return position * scale + offset;
 }
 
-float3 ApplySierpinskiFold(float3 Position)
+float3 ApplySierpinskiFold(float3 position)
 {
-	if (Position.x + Position.y < 0) Position.xy = -Position.yx; 
-	if (Position.x + Position.z < 0) Position.xz = -Position.zx; 
-	if (Position.y + Position.z < 0) Position.zy = -Position.yz;	
+	if (position.x + position.y < 0) position.xy = -position.yx;
+	if (position.x + position.z < 0) position.xz = -position.zx;
+	if (position.y + position.z < 0) position.zy = -position.yz;
 
-	return Position;
+	return position;
 }
 
-float3 ApplyMengerFold(float3 Position)
+float3 ApplyMengerFold(float3 position)
 {
-	//if (Position.x < Position.y) { Position.xy = Position.yx; }
-	//if (Position.x < Position.z) { Position.xz = Position.zx; }
-	//if (Position.y < Position.z) { Position.zy = Position.yz; }
+	//if (position.x < position.y) { position.xy = position.yx; }
+	//if (position.x < position.z) { position.xz = position.zx; }
+	//if (position.y < position.z) { position.zy = position.yz; }
 
 	
-	float a = min(Position.x - Position.y, 0);
-	Position.x -= a;
-	Position.y += a;
+	float a = min(position.x - position.y, 0);
+	position.x -= a;
+	position.y += a;
 
-	a = min(Position.x - Position.z, 0);
-	Position.x -= a;
-	Position.z += a;
+	a = min(position.x - position.z, 0);
+	position.x -= a;
+	position.z += a;
 
-	a = min(Position.y - Position.z, 0);
-	Position.y -= a;
-	Position.z += a;
+	a = min(position.y - position.z, 0);
+	position.y -= a;
+	position.z += a;
 	
 
-	return Position;
+	return position;
 }
 
-float3 ApplyBoxFold(float3 Position, float3 r)
+float3 ApplyBoxFold(float3 position, float3 r)
 {
-	Position.x = ClipToRange(Position.x, r) * 2 - Position.x;
-	Position.y = ClipToRange(Position.y, r) * 2 - Position.y;
-	Position.z = ClipToRange(Position.z, r) * 2 - Position.z;
+	position.x = ClipToRange(position.x, r) * 2 - position.x;
+	position.y = ClipToRange(position.y, r) * 2 - position.y;
+	position.z = ClipToRange(position.z, r) * 2 - position.z;
 
 
-	return Position;
+	return position;
 }
 
-float3 ApplySphereFold(float3 Position, float minR, float maxR)
+float3 ApplySphereFold(float3 position, float minr, float maxr)
 {
-	float rSquared = dot(Position, Position);
-	return Position * max(maxR / max(minR, rSquared), 1.0);
+	float rSquared = dot(position, position);
+	return position * max(maxr / max(minr, rSquared), 1.0);
 }
 
 
-float3 ApplyAbsX(float3 Position)
+float3 ApplyAbsX(float3 position)
 {
-	Position.x = abs(Position.x);
-	return Position;
+	position.x = abs(position.x);
+	return position;
 }
 
-float3 ApplyAbsY(float3 Position)
+float3 ApplyAbsY(float3 position)
 {
-	Position.y = abs(Position.y);
-	return Position;
+	position.y = abs(position.y);
+	return position;
 }
 
-float3 ApplyAbsZ(float3 Position)
+float3 ApplyAbsZ(float3 position)
 {
-	Position.z = abs(Position.z);
-	return Position;
+	position.z = abs(position.z);
+	return position;
 }
 
-float3 ApplyModX(float3 Position, float m)
+float3 ApplyModX(float3 position, float m)
 {
-	Position.x = Position.x % m;
-	return Position;
+	position.x = position.x % m;
+	return position;
 }
 
-float3 ApplyModY(float3 Position, float m)
+float3 ApplyModY(float3 position, float m)
 {
-	Position.y = Position.y % m;
-	return Position;
+	position.y = position.y % m;
+	return position;
 }
 
-float3 ApplyModZ(float3 Position, float m)
+float3 ApplyModZ(float3 position, float m)
 {
-	Position.z = Position.z % m;
-	return Position;
+	position.z = position.z % m;
+	return position;
 }
 
-float3 ApplyRotX(float3 Position, float Angle)
+float3 ApplyRotX(float3 position, float angle)
 {
-	float s = sin(Angle);
-	float c = cos(Angle);
+	float s = sin(angle);
+	float c = cos(angle);
 
-	Position.y = c * Position.y + s * Position.z;
-	Position.z = c * Position.z - s * Position.y;
+	position.y = c * position.y + s * position.z;
+	position.z = c * position.z - s * position.y;
 
-	return Position;
+	return position;
 }
 
-float3 ApplyRotY(float3 Position, float Angle)
+float3 ApplyRotY(float3 position, float angle)
 {
-	float s = sin(Angle);
-	float c = cos(Angle);
+	float s = sin(angle);
+	float c = cos(angle);
 
-	Position.x = c * Position.x - s * Position.z;
-	Position.z = c * Position.z + s * Position.x;
+	position.x = c * position.x - s * position.z;
+	position.z = c * position.z + s * position.x;
 
-	return Position;
+	return position;
 }
 
-float3 ApplyRotZ(float3 Position, float Angle)
+float3 ApplyRotZ(float3 position, float angle)
 {
-	float s = sin(Angle);
-	float c = cos(Angle);
+	float s = sin(angle);
+	float c = cos(angle);
 
-	Position.x = c * Position.x + s * Position.y;
-	Position.y = c * Position.y - s * Position.x;
+	position.x = c * position.x + s * position.y;
+	position.y = c * position.y - s * position.x;
 
-	return Position;
+	return position;
 }
 
-float3 ApplyNFold(float3 Position, float3 n, float d)
+float3 ApplyNFold(float3 position, float3 n, float d)
 {
-	Position -= 2.0 * min(0.0, dot(Position, n) - d) * n;
+	position -= 2.0 * min(0.0, dot(position, n) - d) * n;
 
-	return Position;
+	return position;
 }
 
 #endif
