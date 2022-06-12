@@ -127,9 +127,10 @@ public class RayMarcher : MonoBehaviour
         }
 
         Vector3 currentPosition = camera.transform.localPosition;
+        Vector3 currentRotation = GetComponent<Camera>().transform.localEulerAngles;
 
-        camera.transform.Rotate(new Vector3(0, Input.GetAxis("Horizontal") * rotationSpeed * Time.deltaTime,0));
-        camera.transform.Rotate(new Vector3(-Input.GetAxis("Vertical") * rotationSpeed * Time.deltaTime, 0,0));
+        currentRotation = currentRotation + new Vector3(-Input.GetAxis("Vertical"), Input.GetAxis("Horizontal"), 0) * rotationSpeed * Time.deltaTime;
+        camera.transform.localEulerAngles = currentRotation;
 
         if (Input.GetKey("space"))
         {
